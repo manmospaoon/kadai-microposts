@@ -10,4 +10,6 @@ class User < ApplicationRecord
   has_secure_password
   #password_digest カラムを用意し、モデルに has_secure_password を記述すれば、
   #ログイン認証のための準備を用意してくれる。
+  
+  has_many :microposts
 end

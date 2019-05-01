@@ -1,6 +1,5 @@
 class UsersController < ApplicationController
-  include SessionsHelper
-  
+
   before_action :require_user_logged_in, only: [:index, :show]
   
   def index
@@ -9,6 +8,8 @@ class UsersController < ApplicationController
 
   def show
      @user = User.find(params[:id])
+     @microposts = @user.microposts.order(id: :desc).page(params[:page])
+     counts(@user)
   end
 
   def new
