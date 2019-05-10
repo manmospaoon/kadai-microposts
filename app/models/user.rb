@@ -1,4 +1,5 @@
 class User < ApplicationRecord
+
   before_save { self.email.downcase! }
   #文字を全て小文字に変換する。
   validates :name, presence: true, length: { maximum: 50 }
@@ -12,6 +13,8 @@ class User < ApplicationRecord
   #ログイン認証のための準備を用意してくれる。
   
   has_many :microposts
+  has_many :favorites
+  has_many :likes, through: :favorites, source: :micropost
   has_many :relationships
   #多対多の図の右半分にいる「自分がフォローしているUser」への参照.
   
@@ -25,6 +28,8 @@ class User < ApplicationRecord
   #User から Relationship を取得するとき、user_id が使用される。そのため、逆方向では、foreign_key: 'follow_id' と指定して、 user_id 側ではないことを明示
   
   has_many :followers, through: :reverses_of_relationship, source: :user
+  
+  
   
   
   def follow(other_user)
@@ -50,5 +55,18 @@ class User < ApplicationRecord
   def feed_microposts
     Micropost.where(user_id: self.following_ids + [self.id])
     #Micropost.where(user_id: フォローユーザ + 自分自身) となる Micropost を全て取得
+  end
+  
+  def favorite(micropost)
+    favorites.find_or_create_by(micropost_id: micropost.id)
+  end
+  
+  def unfavorite(micropost)
+    favorite = self.favorites.find_by(micropost_id: micropost.id)
+    favorite.destroy if favorite
+  end
+  
+  def like?(micropost)
+    self.likes.include?(micropost)
   end
 end
